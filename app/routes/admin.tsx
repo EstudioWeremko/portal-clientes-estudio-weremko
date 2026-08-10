@@ -15,52 +15,64 @@ export default function Admin() {
   const [loading, setLoading] = useState(true);
   const [nombre, setNombre] = useState("Administrador");
 
-  useEffect(() => {
-    async function verificarAcceso() {
- const {
-  data: { session },
-  error: sessionError,
-} = await supabase.auth.getSession();
+   useEffect(() => {
+  async function verificarAcceso() {
+    alert("ADMIN 1 - Iniciando verificación");
 
-if (sessionError || !session?.user) {
-  window.location.href = "/";
-  return;
-}
+    const {
+      data: { session },
+      error: sessionError,
+    } = await supabase.auth.getSession();
 
-const user = session.user;
+    alert(
+      sessionError
+        ? `ADMIN 2 - Error sesión: ${sessionError.message}`
+        : session
+          ? `ADMIN 2 - Sesión encontrada: ${session.user.email}`
+          : "ADMIN 2 - No hay sesión"
+    );
 
-if (!user) {
-  window.location.href = "/";
-  return;
-}
-
-      const { data: perfil, error } = await supabase
-        .from("perfiles")
-        .select("nombre, apellido, rol, activo")
-        .eq("id", user.id)
-        .single();
-
-     if (
-  error ||
-  !perfil ||
-  String(perfil.rol ?? "").trim().toLowerCase() !== "administrador" ||
-  perfil.activo === false
-) {
-  await supabase.auth.signOut();
-  window.location.href = "/";
-  return;
-}
-
-      const nombreCompleto =
-        `${perfil.nombre || ""} ${perfil.apellido || ""}`.trim();
-
-      setNombre(nombreCompleto || "Administrador");
-      setLoading(false);
+    if (sessionError || !session?.user) {
+      window.location.href = "/";
+      return;
     }
 
-    verificarAcceso();
-  }, []);
+    const user = session.user;
 
+    alert("ADMIN 3 - Voy a consultar el perfil");
+
+    const { data: perfil, error } = await supabase
+      .from("perfiles")
+      .select("nombre, apellido, rol, activo")
+      .eq("id", user.id)
+      .single();
+
+    alert(
+      error
+        ? `ADMIN 4 - Error perfil: ${error.message}`
+        : `ADMIN 4 - Perfil encontrado: ${perfil?.rol} - activo: ${perfil?.activo}`
+    );
+
+    if (
+      error ||
+      !perfil ||
+      String(perfil.rol ?? "").trim().toLowerCase() !== "administrador" ||
+      perfil.activo === false
+    ) {
+      await supabase.auth.signOut();
+      window.location.href = "/";
+      return;
+    }
+
+    const nombreCompleto =
+      `${perfil.nombre || ""} ${perfil.apellido || ""}`.trim();
+
+    setNombre(nombreCompleto || "Administrador");
+    setLoading(false);
+  }
+
+  verificarAcceso();
+}, []);
   async function cerrarSesion() {
     await supabase.auth.signOut();
     window.location.href = "/";
