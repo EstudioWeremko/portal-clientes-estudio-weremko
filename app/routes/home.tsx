@@ -1,6 +1,7 @@
 import type { Route } from "./+types/home";
 import { useState } from "react";
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "../supabase";
+
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "Portal de Clientes | Estudio Weremko" },
@@ -11,16 +12,7 @@ export function meta({}: Route.MetaArgs) {
     },
   ];
 }
-const supabaseUrl = "https://aioxkxhfxlilynygripl.supabase.co";
-const supabaseAnonKey = "sb_publishable_Fg6trPrZcm_EB5dmYpyJTQ_zPGzB71T";
 
-const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
-  },
-});
 export default function Home() {
 const [error, setError] = useState("");
 const [loading, setLoading] = useState(false);
