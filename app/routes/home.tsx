@@ -501,9 +501,9 @@ alert(
   }
 
   if (perfil.rol === "administrador") {
-    window.location.href = "/admin";
-    return;
-  }
+  alert("Redirigiendo al panel administrador");
+  window.location.assign("/admin");
+  return;
 
   if (perfil.rol === "cliente") {
     window.location.href = "/panel";
