@@ -30,7 +30,7 @@ export default function Admin() {
       if (
         error ||
         !perfil ||
-        perfil.rol !== "administrador" ||
+        String(perfil.rol ?? "").trim().toLowerCase() !== "administrador"
         perfil.activo === false
       ) {
         await supabase.auth.signOut();
