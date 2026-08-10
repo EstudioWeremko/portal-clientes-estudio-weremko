@@ -12,7 +12,7 @@ export default function Admin() {
 
   useEffect(() => {
     async function verificarAcceso() {
-     const {
+  const {
   data: { user },
   error: userError,
 } = await supabase.auth.getUser();
