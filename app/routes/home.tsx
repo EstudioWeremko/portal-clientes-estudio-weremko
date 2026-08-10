@@ -1,5 +1,6 @@
 import type { Route } from "./+types/home";
-
+import { useState } from "react";
+import { createClient } from "@supabase/supabase-js";
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "Portal de Clientes | Estudio Weremko" },
@@ -10,8 +11,13 @@ export function meta({}: Route.MetaArgs) {
     },
   ];
 }
+const supabaseUrl = "https://aioxkxhfxlilynygripl.supabase.co";
+const supabaseAnonKey = "sb_publishable_Fg6trPrZcm_EB5dmYpyJTQ_zPGzB71T";
 
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 export default function Home() {
+const [error, setError] = useState("");
+const [loading, setLoading] = useState(false);
   return (
     <>
       <style>{`
@@ -420,9 +426,64 @@ export default function Home() {
             </p>
 
             <form
-              onSubmit={(event) => {
-                event.preventDefault();
-              }}
+            onSubmit={async (event) => {
+  event.preventDefault();
+
+  setError("");
+  setLoading(true);
+
+  const form = event.currentTarget;
+  const formData = new FormData(form);
+
+  const email = String(formData.get("email") || "");
+  const password = String(formData.get("password") || "");
+
+  const { data, error: loginError } =
+    await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+  if (loginError || !data.user) {
+    setError("Correo electrónico o contraseña incorrectos.");
+    setLoading(false);
+    return;
+  }
+
+  const { data: perfil, error: perfilError } = await supabase
+    .from("perfiles")
+    .select("rol, activo, cliente_id")
+    .eq("id", data.user.id)
+    .single();
+
+  if (perfilError || !perfil) {
+    await supabase.auth.signOut();
+    setError("No se encontró un perfil autorizado para este usuario.");
+    setLoading(false);
+    return;
+  }
+
+  if (perfil.activo === false) {
+    await supabase.auth.signOut();
+    setError("Este usuario se encuentra deshabilitado.");
+    setLoading(false);
+    return;
+  }
+
+  if (perfil.rol === "administrador") {
+    window.location.href = "/admin";
+    return;
+  }
+
+  if (perfil.rol === "cliente") {
+    window.location.href = "/panel";
+    return;
+  }
+
+  await supabase.auth.signOut();
+  setError("El usuario no tiene un rol válido.");
+  setLoading(false);
+}}
             >
               <div className="field">
                 <label htmlFor="email">Correo electrónico</label>
@@ -456,9 +517,21 @@ export default function Home() {
                 />
               </div>
 
-              <button className="submit" type="submit">
-                Ingresar al portal
-              </button>
+             <button className="submit" type="submit" disabled={loading}>
+  {loading ? "Ingresando..." : "Ingresar al portal"}
+</button>
+              {error && (
+  <div
+    style={{
+      marginTop: "12px",
+      color: "#b42318",
+      fontSize: "12px",
+      lineHeight: "1.5",
+    }}
+  >
+    {error}
+  </div>
+)}
 
               <div className="status">
                 El sistema de autenticación se encuentra en etapa de
