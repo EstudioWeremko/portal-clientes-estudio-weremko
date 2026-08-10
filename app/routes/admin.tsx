@@ -1,16 +1,6 @@
 import { useEffect, useState } from "react";
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "../supabase";
 
-const supabaseUrl = "https://aioxkxhfylilynygripl.supabase.co";
-const supabaseAnonKey = "sb_publishable_Fg6trPrZcm_EB5dmYpyJTQ_zPGzB71T";
-
-const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
-  },
-});
 export default function Admin() {
   const [loading, setLoading] = useState(true);
   const [nombre, setNombre] = useState("Administrador");
