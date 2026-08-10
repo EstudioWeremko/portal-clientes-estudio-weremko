@@ -36,16 +36,16 @@ if (!user) {
         .eq("id", user.id)
         .single();
 
-      if (
-        error ||
-        !perfil ||
-        String(perfil.rol ?? "").trim().toLowerCase() !== "administrador"
-        perfil.activo === false
-      ) {
-        await supabase.auth.signOut();
-        window.location.href = "/";
-        return;
-      }
+     if (
+  error ||
+  !perfil ||
+  String(perfil.rol ?? "").trim().toLowerCase() !== "administrador" ||
+  perfil.activo === false
+) {
+  await supabase.auth.signOut();
+  window.location.href = "/";
+  return;
+}
 
       const nombreCompleto =
         `${perfil.nombre || ""} ${perfil.apellido || ""}`.trim();
