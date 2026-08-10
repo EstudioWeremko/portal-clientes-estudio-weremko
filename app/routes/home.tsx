@@ -503,7 +503,30 @@ alert(
   alert(`ROL EXACTO: [${perfil.rol}] - longitud: ${perfil.rol?.length}`);
 
 if (perfil.rol === "administrador") {
-  alert("Redirigiendo al panel administrador");
+  alert("Redirigiendo al panel administrador");if (perfil.activo === false) {
+  await supabase.auth.signOut();
+  setError("Este usuario se encuentra deshabilitado.");
+  setLoading(false);
+  return;
+}
+
+const rol = String(perfil.rol ?? "")
+  .trim()
+  .toLowerCase();
+
+if (rol === "administrador") {
+  window.location.href = "/admin";
+  return;
+}
+
+if (rol === "cliente") {
+  window.location.href = "/panel";
+  return;
+}
+
+await supabase.auth.signOut();
+setError("El usuario no tiene un rol válido.");
+setLoading(false);
   window.location.assign("/admin");
   return;
 }
