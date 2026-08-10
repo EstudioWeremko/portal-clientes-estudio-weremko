@@ -500,10 +500,13 @@ alert(
     return;
   }
 
-  if (perfil.rol === "administrador") {
+  alert(`ROL EXACTO: [${perfil.rol}] - longitud: ${perfil.rol?.length}`);
+
+if (perfil.rol === "administrador") {
   alert("Redirigiendo al panel administrador");
   window.location.assign("/admin");
   return;
+}
 
   if (perfil.rol === "cliente") {
     window.location.href = "/panel";
