@@ -4,26 +4,30 @@ import { createClient } from "@supabase/supabase-js";
 const supabaseUrl = "https://aioxkxhfylilynygripl.supabase.co";
 const supabaseAnonKey = "sb_publishable_Fg6trPrZcm_EB5dmYpyJTQ_zPGzB71T";
 
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
+const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+  },
+});
 export default function Admin() {
   const [loading, setLoading] = useState(true);
   const [nombre, setNombre] = useState("Administrador");
 
   useEffect(() => {
     async function verificarAcceso() {
-  const {
-  data: { user },
-  error: userError,
-} = await supabase.auth.getUser();
+ const {
+  data: { session },
+  error: sessionError,
+} = await supabase.auth.getSession();
 
-alert(
-  userError
-    ? `ADMIN - Error obteniendo usuario: ${userError.message}`
-    : user
-      ? `ADMIN - Sesión encontrada: ${user.email}`
-      : "ADMIN - NO HAY SESIÓN"
-);
+if (sessionError || !session?.user) {
+  window.location.href = "/";
+  return;
+}
+
+const user = session.user;
 
 if (!user) {
   window.location.href = "/";
