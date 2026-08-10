@@ -440,11 +440,33 @@ const [loading, setLoading] = useState(false);
   const email = String(formData.get("email") || "");
   const password = String(formData.get("password") || "");
 
-  const { data, error: loginError } =
-    await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+let data;
+let loginError;
+
+try {
+  const result = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  data = result.data;
+  loginError = result.error;
+
+  alert(
+    loginError
+      ? `Supabase respondió con error: ${loginError.message}`
+      : "Supabase respondió correctamente"
+  );
+} catch (err) {
+  alert(
+    `Error al conectar con Supabase: ${
+      err instanceof Error ? err.message : String(err)
+    }`
+  );
+
+  setLoading(false);
+  return;
+}
 
   if (loginError || !data.user) {
     setError("Correo electrónico o contraseña incorrectos.");
