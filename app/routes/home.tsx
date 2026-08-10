@@ -429,6 +429,8 @@ const [loading, setLoading] = useState(false);
             onSubmit={async (event) => {
   event.preventDefault();
 
+  alert("El formulario está ejecutando JavaScript");
+
   setError("");
   setLoading(true);
 
