@@ -474,11 +474,17 @@ try {
     return;
   }
 
-  const { data: perfil, error: perfilError } = await supabase
-    .from("perfiles")
-    .select("rol, activo, cliente_id")
-    .eq("id", data.user.id)
-    .single();
+ const { data: perfil, error: perfilError } = await supabase
+  .from("perfiles")
+  .select("rol, activo, cliente_id")
+  .eq("id", data.user.id)
+  .single();
+
+alert(
+  perfilError
+    ? `Error al consultar perfil: ${perfilError.message}`
+    : `Perfil encontrado. Rol: ${perfil?.rol} - Activo: ${perfil?.activo}`
+);
 
   if (perfilError || !perfil) {
     await supabase.auth.signOut();
