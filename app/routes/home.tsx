@@ -14,7 +14,13 @@ export function meta({}: Route.MetaArgs) {
 const supabaseUrl = "https://aioxkxhfxlilynygripl.supabase.co";
 const supabaseAnonKey = "sb_publishable_Fg6trPrZcm_EB5dmYpyJTQ_zPGzB71T";
 
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+  },
+});
 export default function Home() {
 const [error, setError] = useState("");
 const [loading, setLoading] = useState(false);
