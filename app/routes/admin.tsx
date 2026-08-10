@@ -12,14 +12,23 @@ export default function Admin() {
 
   useEffect(() => {
     async function verificarAcceso() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+     const {
+  data: { user },
+  error: userError,
+} = await supabase.auth.getUser();
 
-      if (!user) {
-        window.location.href = "/";
-        return;
-      }
+alert(
+  userError
+    ? `ADMIN - Error obteniendo usuario: ${userError.message}`
+    : user
+      ? `ADMIN - Sesión encontrada: ${user.email}`
+      : "ADMIN - NO HAY SESIÓN"
+);
+
+if (!user) {
+  window.location.href = "/";
+  return;
+}
 
       const { data: perfil, error } = await supabase
         .from("perfiles")
