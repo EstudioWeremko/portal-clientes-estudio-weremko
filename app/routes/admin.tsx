@@ -121,10 +121,11 @@ export default function Admin() {
             marginTop: "30px",
           }}
         >
-          <Tarjeta
-            titulo="Clientes"
-            descripcion="Administrar clientes del estudio."
-          />
+        <Tarjeta
+  titulo="Clientes"
+  descripcion="Administrar clientes del estudio."
+  enlace="/clientes"
+/>
 
           <Tarjeta
             titulo="Trámites"
@@ -159,9 +160,11 @@ export default function Admin() {
 function Tarjeta({
   titulo,
   descripcion,
+  enlace,
 }: {
   titulo: string;
   descripcion: string;
+  enlace?: string;
 }) {
   return (
     <div
@@ -177,9 +180,11 @@ function Tarjeta({
 
       <p style={{ color: "#667085" }}>{descripcion}</p>
 
-      <button type="button">
-        Administrar
-      </button>
+   {enlace ? (
+  <a href={enlace}>Administrar</a>
+) : (
+  <button type="button">Administrar</button>
+)}
     </div>
   );
 }
