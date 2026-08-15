@@ -31,6 +31,17 @@ export default function Clientes() {
   const [domicilio, setDomicilio] = useState("");
   const [observaciones, setObservaciones] = useState("");
 
+  const [clienteEditando, setClienteEditando] = useState<Cliente | null>(null);
+
+const [editNombre, setEditNombre] = useState("");
+const [editApellido, setEditApellido] = useState("");
+const [editDni, setEditDni] = useState("");
+const [editEmail, setEditEmail] = useState("");
+const [editTelefono, setEditTelefono] = useState("");
+const [editLocalidad, setEditLocalidad] = useState("");
+const [editDomicilio, setEditDomicilio] = useState("");
+const [editObservaciones, setEditObservaciones] = useState("");
+  
   useEffect(() => {
     verificarAcceso();
   }, []);
@@ -152,60 +163,62 @@ export default function Clientes() {
 
  
   
-  async function editarCliente(cliente: Cliente) {
-  const nombreNuevo = window.prompt("Nombre:", cliente.nombre);
-  if (nombreNuevo === null) return;
+function iniciarEdicion(cliente: Cliente) {
+  setClienteEditando(cliente);
 
-  const apellidoNuevo = window.prompt("Apellido:", cliente.apellido);
-  if (apellidoNuevo === null) return;
+  setEditNombre(cliente.nombre);
+  setEditApellido(cliente.apellido);
+  setEditDni(cliente.dni || "");
+  setEditEmail(cliente.email || "");
+  setEditTelefono(cliente.telefono || "");
+  setEditLocalidad(cliente.localidad || "");
+  setEditDomicilio(cliente.domicilio || "");
+  setEditObservaciones(cliente.observaciones || "");
 
-  const dniNuevo = window.prompt("DNI / CUIT:", cliente.dni || "");
-  if (dniNuevo === null) return;
+  setMensaje("");
+}
 
-  const emailNuevo = window.prompt("Correo electrónico:", cliente.email || "");
-  if (emailNuevo === null) return;
+function cancelarEdicion() {
+  setClienteEditando(null);
+  setMensaje("");
+}
 
-  const telefonoNuevo = window.prompt("Teléfono:", cliente.telefono || "");
-  if (telefonoNuevo === null) return;
+async function guardarEdicion() {
+  if (!clienteEditando) return;
 
-  const localidadNueva = window.prompt("Localidad:", cliente.localidad || "");
-  if (localidadNueva === null) return;
-
-  const domicilioNuevo = window.prompt("Domicilio:", cliente.domicilio || "");
-  if (domicilioNuevo === null) return;
-
-  const observacionesNuevas = window.prompt(
-    "Observaciones:",
-    cliente.observaciones || ""
-  );
-  if (observacionesNuevas === null) return;
-
-  if (!nombreNuevo.trim() || !apellidoNuevo.trim()) {
+  if (!editNombre.trim() || !editApellido.trim()) {
     setMensaje("Nombre y apellido son obligatorios.");
     return;
   }
 
+  setGuardando(true);
+  setMensaje("");
+
   const { error } = await supabase
     .from("clientes")
     .update({
-      nombre: nombreNuevo.trim(),
-      apellido: apellidoNuevo.trim(),
-      dni: dniNuevo.trim() || null,
-      email: emailNuevo.trim() || null,
-      telefono: telefonoNuevo.trim() || null,
-      localidad: localidadNueva.trim() || null,
-      domicilio: domicilioNuevo.trim() || null,
-      observaciones: observacionesNuevas.trim() || null,
+      nombre: editNombre.trim(),
+      apellido: editApellido.trim(),
+      dni: editDni.trim() || null,
+      email: editEmail.trim() || null,
+      telefono: editTelefono.trim() || null,
+      localidad: editLocalidad.trim() || null,
+      domicilio: editDomicilio.trim() || null,
+      observaciones: editObservaciones.trim() || null,
       actualizado_en: new Date().toISOString(),
     })
-    .eq("id", cliente.id);
+    .eq("id", clienteEditando.id);
 
   if (error) {
     setMensaje("No se pudo modificar el cliente: " + error.message);
+    setGuardando(false);
     return;
   }
 
   setMensaje("Cliente actualizado correctamente.");
+  setClienteEditando(null);
+  setGuardando(false);
+
   await cargarClientes();
 }
   
@@ -280,6 +293,7 @@ export default function Clientes() {
               padding: "14px",
               background: "#ffffff",
               border: "1px solid #d9dee5",
+              
               borderRadius: "8px",
             }}
           >
@@ -378,7 +392,126 @@ export default function Clientes() {
             </button>
           </form>
         </section>
+{clienteEditando && (
+  <section
+    style={{
+      background: "white",
+      padding: "24px",
+      borderRadius: "12px",
+      marginTop: "28px",
+      border: "2px solid #18395f",
+    }}
+  >
+    <h3 style={{ marginTop: 0 }}>Editar cliente</h3>
 
+    <p style={{ color: "#596675" }}>
+      Modificá los datos del cliente y guardá los cambios.
+    </p>
+
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+        gap: "16px",
+      }}
+    >
+      <input
+        placeholder="Nombre *"
+        value={editNombre}
+        onChange={(e) => setEditNombre(e.target.value)}
+      />
+
+      <input
+        placeholder="Apellido *"
+        value={editApellido}
+        onChange={(e) => setEditApellido(e.target.value)}
+      />
+
+      <input
+        placeholder="DNI / CUIT"
+        value={editDni}
+        onChange={(e) => setEditDni(e.target.value)}
+      />
+
+      <input
+        type="email"
+        placeholder="Correo electrónico"
+        value={editEmail}
+        onChange={(e) => setEditEmail(e.target.value)}
+      />
+
+      <input
+        placeholder="Teléfono"
+        value={editTelefono}
+        onChange={(e) => setEditTelefono(e.target.value)}
+      />
+
+      <input
+        placeholder="Localidad"
+        value={editLocalidad}
+        onChange={(e) => setEditLocalidad(e.target.value)}
+      />
+
+      <input
+        placeholder="Domicilio"
+        value={editDomicilio}
+        onChange={(e) => setEditDomicilio(e.target.value)}
+      />
+    </div>
+
+    <textarea
+      placeholder="Observaciones"
+      value={editObservaciones}
+      onChange={(e) => setEditObservaciones(e.target.value)}
+      style={{
+        width: "100%",
+        marginTop: "16px",
+        minHeight: "90px",
+        boxSizing: "border-box",
+      }}
+    />
+
+    <div
+      style={{
+        display: "flex",
+        gap: "12px",
+        marginTop: "18px",
+      }}
+    >
+      <button
+        type="button"
+        onClick={guardarEdicion}
+        disabled={guardando}
+        style={{
+          background: "#18395f",
+          color: "white",
+          border: "none",
+          padding: "13px 24px",
+          borderRadius: "6px",
+          cursor: "pointer",
+        }}
+      >
+        {guardando ? "Guardando..." : "Guardar cambios"}
+      </button>
+
+      <button
+        type="button"
+        onClick={cancelarEdicion}
+        disabled={guardando}
+        style={{
+          background: "white",
+          color: "#18395f",
+          border: "1px solid #18395f",
+          padding: "13px 24px",
+          borderRadius: "6px",
+          cursor: "pointer",
+        }}
+      >
+        Cancelar
+      </button>
+    </div>
+  </section>
+)}
         <section
           style={{
             background: "white",
@@ -454,7 +587,7 @@ export default function Clientes() {
     }}
   >
     <button
-      onClick={() => editarCliente(cliente)}
+onClick={() => iniciarEdicion(cliente)}
       style={{
         padding: "7px 10px",
         cursor: "pointer",
