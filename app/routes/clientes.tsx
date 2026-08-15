@@ -150,6 +150,65 @@ export default function Clientes() {
     await cargarClientes();
   }
 
+ 
+  
+  async function editarCliente(cliente: Cliente) {
+  const nombreNuevo = window.prompt("Nombre:", cliente.nombre);
+  if (nombreNuevo === null) return;
+
+  const apellidoNuevo = window.prompt("Apellido:", cliente.apellido);
+  if (apellidoNuevo === null) return;
+
+  const dniNuevo = window.prompt("DNI / CUIT:", cliente.dni || "");
+  if (dniNuevo === null) return;
+
+  const emailNuevo = window.prompt("Correo electrónico:", cliente.email || "");
+  if (emailNuevo === null) return;
+
+  const telefonoNuevo = window.prompt("Teléfono:", cliente.telefono || "");
+  if (telefonoNuevo === null) return;
+
+  const localidadNueva = window.prompt("Localidad:", cliente.localidad || "");
+  if (localidadNueva === null) return;
+
+  const domicilioNuevo = window.prompt("Domicilio:", cliente.domicilio || "");
+  if (domicilioNuevo === null) return;
+
+  const observacionesNuevas = window.prompt(
+    "Observaciones:",
+    cliente.observaciones || ""
+  );
+  if (observacionesNuevas === null) return;
+
+  if (!nombreNuevo.trim() || !apellidoNuevo.trim()) {
+    setMensaje("Nombre y apellido son obligatorios.");
+    return;
+  }
+
+  const { error } = await supabase
+    .from("clientes")
+    .update({
+      nombre: nombreNuevo.trim(),
+      apellido: apellidoNuevo.trim(),
+      dni: dniNuevo.trim() || null,
+      email: emailNuevo.trim() || null,
+      telefono: telefonoNuevo.trim() || null,
+      localidad: localidadNueva.trim() || null,
+      domicilio: domicilioNuevo.trim() || null,
+      observaciones: observacionesNuevas.trim() || null,
+      actualizado_en: new Date().toISOString(),
+    })
+    .eq("id", cliente.id);
+
+  if (error) {
+    setMensaje("No se pudo modificar el cliente: " + error.message);
+    return;
+  }
+
+  setMensaje("Cliente actualizado correctamente.");
+  await cargarClientes();
+}
+  
   async function cerrarSesion() {
     await supabase.auth.signOut();
     window.location.href = "/";
@@ -385,17 +444,36 @@ export default function Clientes() {
 
                       <td>{cliente.activo ? "Activo" : "Inactivo"}</td>
 
+                      
                       <td>
-                        <button
-                          onClick={() => cambiarEstado(cliente)}
-                          style={{
-                            padding: "7px 10px",
-                            cursor: "pointer",
-                          }}
-                        >
-                          {cliente.activo ? "Desactivar" : "Activar"}
-                        </button>
-                      </td>
+  <div
+    style={{
+      display: "flex",
+      gap: "8px",
+      flexWrap: "wrap",
+    }}
+  >
+    <button
+      onClick={() => editarCliente(cliente)}
+      style={{
+        padding: "7px 10px",
+        cursor: "pointer",
+      }}
+    >
+      Editar
+    </button>
+
+    <button
+      onClick={() => cambiarEstado(cliente)}
+      style={{
+        padding: "7px 10px",
+        cursor: "pointer",
+      }}
+    >
+      {cliente.activo ? "Desactivar" : "Activar"}
+    </button>
+  </div>
+</td>
                     </tr>
                   ))}
                 </tbody>
