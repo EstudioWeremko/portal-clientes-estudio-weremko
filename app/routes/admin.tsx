@@ -127,10 +127,11 @@ export default function Admin() {
   enlace="/clientes"
 />
 
-          <Tarjeta
-            titulo="Trámites"
-            descripcion="Crear y gestionar trámites."
-          />
+         <Tarjeta
+  titulo="Trámites"
+  descripcion="Crear y gestionar trámites."
+  enlace="/tramites"
+/>
 
           <Tarjeta
             titulo="Documentación"
