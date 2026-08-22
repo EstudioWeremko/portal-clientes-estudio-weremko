@@ -45,7 +45,16 @@ export default function Tramites() {
     new Date().toISOString().slice(0, 10)
   );
   const [observaciones, setObservaciones] = useState("");
+const [tramiteEditando, setTramiteEditando] = useState<Tramite | null>(null);
 
+const [editNumero, setEditNumero] = useState("");
+const [editTitulo, setEditTitulo] = useState("");
+const [editTipo, setEditTipo] = useState("");
+const [editDescripcion, setEditDescripcion] = useState("");
+const [editEstado, setEditEstado] = useState("En gestión");
+const [editFechaInicio, setEditFechaInicio] = useState("");
+const [editFechaFinalizacion, setEditFechaFinalizacion] = useState("");
+const [editObservaciones, setEditObservaciones] = useState("");
   useEffect(() => {
     verificarAcceso();
   }, []);
@@ -188,6 +197,65 @@ export default function Tramites() {
 
     await cargarDatos();
   }
+
+  function editarTramite(tramite: Tramite) {
+  setTramiteEditando(tramite);
+
+  setEditNumero(tramite.numero || "");
+  setEditTitulo(tramite.titulo);
+  setEditTipo(tramite.tipo || "");
+  setEditDescripcion(tramite.descripcion || "");
+  setEditEstado(tramite.estado);
+  setEditFechaInicio(tramite.fecha_inicio || "");
+  setEditFechaFinalizacion(tramite.fecha_finalizacion || "");
+  setEditObservaciones(tramite.observaciones || "");
+
+  setMensaje("");
+}
+
+function cancelarEdicionTramite() {
+  setTramiteEditando(null);
+  setMensaje("");
+}
+
+async function guardarEdicionTramite() {
+  if (!tramiteEditando) return;
+
+  if (!editTitulo.trim()) {
+    setMensaje("El título del trámite es obligatorio.");
+    return;
+  }
+
+  setGuardando(true);
+  setMensaje("");
+
+  const { error } = await supabase
+    .from("tramites")
+    .update({
+      numero: editNumero.trim() || null,
+      titulo: editTitulo.trim(),
+      tipo: editTipo.trim() || null,
+      descripcion: editDescripcion.trim() || null,
+      estado: editEstado,
+      fecha_inicio: editFechaInicio,
+      fecha_finalizacion: editFechaFinalizacion || null,
+      observaciones: editObservaciones.trim() || null,
+      actualizado_en: new Date().toISOString(),
+    })
+    .eq("id", tramiteEditando.id);
+
+  if (error) {
+    setMensaje("No se pudo modificar el trámite: " + error.message);
+    setGuardando(false);
+    return;
+  }
+
+  setMensaje("Trámite actualizado correctamente.");
+  setTramiteEditando(null);
+  setGuardando(false);
+
+  await cargarDatos();
+}
 
   async function cerrarSesion() {
     await supabase.auth.signOut();
@@ -384,7 +452,140 @@ export default function Tramites() {
             </button>
           </form>
         </section>
+{tramiteEditando && (
+  <section
+    style={{
+      background: "white",
+      padding: "24px",
+      borderRadius: "12px",
+      marginTop: "28px",
+      border: "2px solid #18395f",
+    }}
+  >
+    <h3 style={{ marginTop: 0 }}>Editar trámite</h3>
 
+    <p style={{ color: "#596675" }}>
+      Modificá los datos del trámite y guardá los cambios.
+    </p>
+
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+        gap: "16px",
+      }}
+    >
+      <input
+        placeholder="Número interno"
+        value={editNumero}
+        onChange={(e) => setEditNumero(e.target.value)}
+      />
+
+      <input
+        placeholder="Título del trámite *"
+        value={editTitulo}
+        onChange={(e) => setEditTitulo(e.target.value)}
+      />
+
+      <input
+        placeholder="Tipo de trámite"
+        value={editTipo}
+        onChange={(e) => setEditTipo(e.target.value)}
+      />
+
+      <select
+        value={editEstado}
+        onChange={(e) => setEditEstado(e.target.value)}
+      >
+        <option value="En gestión">En gestión</option>
+        <option value="Pendiente de documentación">
+          Pendiente de documentación
+        </option>
+        <option value="En análisis">En análisis</option>
+        <option value="Presentado">Presentado</option>
+        <option value="En negociación">En negociación</option>
+        <option value="Finalizado">Finalizado</option>
+        <option value="Archivado">Archivado</option>
+      </select>
+
+      <input
+        type="date"
+        value={editFechaInicio}
+        onChange={(e) => setEditFechaInicio(e.target.value)}
+      />
+
+      <input
+        type="date"
+        value={editFechaFinalizacion}
+        onChange={(e) => setEditFechaFinalizacion(e.target.value)}
+      />
+    </div>
+
+    <textarea
+      placeholder="Descripción"
+      value={editDescripcion}
+      onChange={(e) => setEditDescripcion(e.target.value)}
+      style={{
+        width: "100%",
+        marginTop: "16px",
+        minHeight: "90px",
+        boxSizing: "border-box",
+      }}
+    />
+
+    <textarea
+      placeholder="Observaciones internas"
+      value={editObservaciones}
+      onChange={(e) => setEditObservaciones(e.target.value)}
+      style={{
+        width: "100%",
+        marginTop: "16px",
+        minHeight: "90px",
+        boxSizing: "border-box",
+      }}
+    />
+
+    <div
+      style={{
+        display: "flex",
+        gap: "12px",
+        marginTop: "18px",
+      }}
+    >
+      <button
+        type="button"
+        onClick={guardarEdicionTramite}
+        disabled={guardando}
+        style={{
+          background: "#18395f",
+          color: "white",
+          border: "none",
+          padding: "13px 24px",
+          borderRadius: "6px",
+          cursor: "pointer",
+        }}
+      >
+        {guardando ? "Guardando..." : "Guardar cambios"}
+      </button>
+
+      <button
+        type="button"
+        onClick={cancelarEdicionTramite}
+        disabled={guardando}
+        style={{
+          background: "white",
+          color: "#18395f",
+          border: "1px solid #18395f",
+          padding: "13px 24px",
+          borderRadius: "6px",
+          cursor: "pointer",
+        }}
+      >
+        Cancelar
+      </button>
+    </div>
+  </section>
+)}
         <section
           style={{
             background: "white",
@@ -453,17 +654,55 @@ export default function Tramites() {
                       <td>{tramite.fecha_inicio}</td>
                       <td>{tramite.activo ? "Sí" : "No"}</td>
 
-                      <td>
-                        <button
-                          onClick={() => cambiarEstadoActivo(tramite)}
-                          style={{
-                            padding: "7px 10px",
-                            cursor: "pointer",
-                          }}
-                        >
-                          {tramite.activo ? "Desactivar" : "Activar"}
-                        </button>
-                      </td>
+<td>
+  <div
+    style={{
+      display: "flex",
+      gap: "8px",
+      flexWrap: "wrap",
+    }}
+  >
+    <a
+      href={`/tramites/${tramite.id}`}
+      style={{
+        padding: "7px 10px",
+        background: "#18395f",
+        color: "white",
+        textDecoration: "none",
+        borderRadius: "5px",
+      }}
+    >
+      Ver
+    </a>
+
+    <button
+      type="button"
+      onClick={() => editarTramite(tramite)}
+      style={{
+        padding: "7px 10px",
+        cursor: "pointer",
+        background: "white",
+        color: "#18395f",
+        border: "1px solid #18395f",
+        borderRadius: "5px",
+      }}
+    >
+      Editar
+    </button>
+
+    <button
+      type="button"
+      onClick={() => cambiarEstadoActivo(tramite)}
+      style={{
+        padding: "7px 10px",
+        cursor: "pointer",
+        borderRadius: "5px",
+      }}
+    >
+      {tramite.activo ? "Desactivar" : "Activar"}
+    </button>
+  </div>
+</td>
                     </tr>
                   ))}
                 </tbody>
