@@ -5,4 +5,5 @@ export default [
   route("admin", "routes/admin.tsx"),
   route("clientes", "routes/clientes.tsx"),
   route("tramites", "routes/tramites.tsx"),
+  route("tramites/:id", "routes/tramite-detalle.tsx"),
 ] satisfies RouteConfig;
